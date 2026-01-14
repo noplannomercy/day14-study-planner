@@ -1,16 +1,58 @@
 import { getSubjects } from '@/actions/subjects';
 import { getStudySessions } from '@/actions/sessions';
+import { getUpcomingReviews } from '@/actions/reviews';
+import { SessionForm } from '@/components/sessions/session-form';
 import { SubjectForm } from '@/components/subjects/subject-form';
 import { SubjectList } from '@/components/subjects/subject-list';
-import { SessionForm } from '@/components/sessions/session-form';
+import { TodayReviews } from '@/components/today/today-reviews';
+import { ReviewCalendar } from '@/components/calendar/review-calendar';
+import { StudyCharts } from '@/components/statistics/study-charts';
+import { PlanGenerator, PlanList } from '@/components/plan/plan-generator';
+import { AIInsights } from '@/components/analysis/ai-insights';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { db } from '@/db';
+import { learningPlans, reviewSchedules, studySessions } from '@/db/schema';
+import { isNull } from 'drizzle-orm';
 
 export default async function Home() {
-  const subjectsResult = await getSubjects();
-  const sessionsResult = await getStudySessions();
+  // Fetch all necessary data
+  const [subjectsResult, sessionsResult, reviewsResult] = await Promise.all([
+    getSubjects(),
+    getStudySessions(),
+    getUpcomingReviews(),
+  ]);
 
   const subjects = subjectsResult.success && subjectsResult.data ? subjectsResult.data : [];
   const sessions = sessionsResult.success && sessionsResult.data ? sessionsResult.data : [];
+  const todayReviews = reviewsResult.success && reviewsResult.data ? reviewsResult.data : [];
+
+  // Fetch sessions with subject data for charts
+  const sessionsWithSubjects = await db.query.studySessions.findMany({
+    with: {
+      subject: true,
+    },
+    orderBy: (studySessions, { desc }) => [desc(studySessions.studiedAt)],
+  });
+
+  // Fetch all reviews for calendar
+  const allReviews = await db.query.reviewSchedules.findMany({
+    where: isNull(reviewSchedules.completedAt),
+    with: {
+      session: {
+        with: {
+          subject: true,
+        },
+      },
+    },
+  });
+
+  // Fetch learning plans
+  const plans = await db.query.learningPlans.findMany({
+    with: {
+      subject: true,
+    },
+    orderBy: (learningPlans, { desc }) => [desc(learningPlans.createdAt)],
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,65 +66,106 @@ export default async function Home() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="subjects" className="space-y-6">
+        <Tabs defaultValue="today" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="subjects">Subjects</TabsTrigger>
-            <TabsTrigger value="sessions">Study Sessions</TabsTrigger>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="statistics">Statistics</TabsTrigger>
+            <TabsTrigger value="plan">Plan</TabsTrigger>
+            <TabsTrigger value="analysis">Analysis</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="subjects" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <SubjectForm />
-              <SubjectList subjects={subjects} />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="sessions" className="space-y-6">
+          <TabsContent value="today" className="space-y-6">
             {subjects.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">
-                  Please create a subject first before logging study sessions.
+                  Please create a subject first in the Plan tab.
                 </p>
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2">
-                <SessionForm subjects={subjects} />
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-semibold">Recent Sessions</h2>
-                  {sessions.length === 0 ? (
-                    <p className="text-muted-foreground">No study sessions yet.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {sessions.slice(0, 10).map((session) => {
-                        const subject = subjects.find((s) => s.id === session.subjectId);
-                        return (
-                          <div
-                            key={session.id}
-                            className="p-4 bg-white rounded-lg border"
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              {subject && (
-                                <div
-                                  className="w-3 h-3 rounded-full"
-                                  style={{ backgroundColor: subject.color }}
-                                />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="space-y-6">
+                  <TodayReviews reviews={todayReviews} />
+                </div>
+                <div className="space-y-6">
+                  <SessionForm subjects={subjects} />
+                  <div>
+                    <h2 className="text-2xl font-semibold mb-4">Recent Sessions</h2>
+                    {sessions.length === 0 ? (
+                      <p className="text-muted-foreground">No study sessions yet.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {sessions.slice(0, 5).map((session) => {
+                          const subject = subjects.find((s) => s.id === session.subjectId);
+                          return (
+                            <div
+                              key={session.id}
+                              className="p-4 bg-white rounded-lg border"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                {subject && (
+                                  <div
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: subject.color }}
+                                  />
+                                )}
+                                <span className="font-medium">{subject?.name || 'Unknown'}</span>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Duration: {session.durationMinutes} min | Comprehension: {session.comprehension}/5
+                              </div>
+                              {session.notes && (
+                                <p className="text-sm mt-2">{session.notes}</p>
                               )}
-                              <span className="font-medium">{subject?.name || 'Unknown'}</span>
                             </div>
-                            <div className="text-sm text-muted-foreground">
-                              Duration: {session.durationMinutes} min | Comprehension: {session.comprehension}/5
-                            </div>
-                            {session.notes && (
-                              <p className="text-sm mt-2">{session.notes}</p>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="calendar" className="space-y-6">
+            <ReviewCalendar reviews={allReviews} />
+          </TabsContent>
+
+          <TabsContent value="statistics" className="space-y-6">
+            {sessionsWithSubjects.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  No study sessions yet. Log your first session in the Today tab!
+                </p>
+              </div>
+            ) : (
+              <StudyCharts sessions={sessionsWithSubjects} subjects={subjects} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="plan" className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-semibold mb-4">Subjects</h2>
+              <div className="grid gap-6 lg:grid-cols-2 mb-8">
+                <SubjectForm />
+                <SubjectList subjects={subjects} />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-semibold mb-4">AI Learning Plans</h2>
+              <div className="grid gap-6 lg:grid-cols-2">
+                <PlanGenerator subjects={subjects} />
+                <div>
+                  <PlanList plans={plans} />
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analysis" className="space-y-6">
+            <AIInsights subjects={subjects} />
           </TabsContent>
         </Tabs>
       </main>

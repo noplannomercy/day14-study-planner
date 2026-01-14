@@ -1,4 +1,5 @@
 import { pgTable, serial, varchar, integer, text, timestamp, date } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 export const subjects = pgTable('subjects', {
   id: serial('id').primaryKey(),
@@ -46,6 +47,34 @@ export const motivations = pgTable('motivations', {
   aiMessage: text('ai_message').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
+
+// Relations
+export const subjectsRelations = relations(subjects, ({ many }) => ({
+  studySessions: many(studySessions),
+  learningPlans: many(learningPlans),
+}));
+
+export const studySessionsRelations = relations(studySessions, ({ one, many }) => ({
+  subject: one(subjects, {
+    fields: [studySessions.subjectId],
+    references: [subjects.id],
+  }),
+  reviewSchedules: many(reviewSchedules),
+}));
+
+export const learningPlansRelations = relations(learningPlans, ({ one }) => ({
+  subject: one(subjects, {
+    fields: [learningPlans.subjectId],
+    references: [subjects.id],
+  }),
+}));
+
+export const reviewSchedulesRelations = relations(reviewSchedules, ({ one }) => ({
+  session: one(studySessions, {
+    fields: [reviewSchedules.sessionId],
+    references: [studySessions.id],
+  }),
+}));
 
 // Type inference for TypeScript
 export type Subject = typeof subjects.$inferSelect;

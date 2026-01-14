@@ -28,15 +28,20 @@ function calculateNextReviewDate(comprehension: number, repetitionCount: number)
 export async function getUpcomingReviews() {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const reviews = await db
-      .select()
-      .from(reviewSchedules)
-      .where(
+    const reviews = await db.query.reviewSchedules.findMany({
+      where: (reviewSchedules, { lte, isNull, and }) =>
         and(
           lte(reviewSchedules.nextReviewDate, today),
           isNull(reviewSchedules.completedAt)
-        )
-      );
+        ),
+      with: {
+        session: {
+          with: {
+            subject: true,
+          },
+        },
+      },
+    });
 
     return { success: true, data: reviews };
   } catch (error) {
