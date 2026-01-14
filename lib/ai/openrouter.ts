@@ -12,7 +12,7 @@ const openrouter = createOpenAI({
 });
 
 // Model to use for all AI requests
-const MODEL = 'anthropic/claude-haiku-4-5-20250514';
+const MODEL = 'anthropic/claude-haiku-4.5';
 
 /**
  * Generate text using Claude Haiku via Open Router

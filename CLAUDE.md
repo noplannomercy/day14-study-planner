@@ -1,7 +1,7 @@
 # AI Study Planner
 
 ## Tech Stack
-Next.js 14 (App Router), TypeScript (strict), PostgreSQL (localhost:5432), Drizzle ORM, shadcn/ui, Recharts, AI SDK + Open Router, Model: `anthropic/claude-haiku-4-5-20250514`
+Next.js 14 (App Router), TypeScript (strict), PostgreSQL (localhost:5432), Drizzle ORM, shadcn/ui, Recharts, AI SDK + Open Router, Model: `anthropic/claude-haiku-4.5`
 
 ## Commands
 - `npm run dev` - Development server
@@ -23,7 +23,7 @@ ALWAYS: Complete phase → `npm run lint` → `npm run build` → Commit → Upd
 ## AI Integration
 IMPORTANT: Open Router setup in `lib/ai/openrouter.ts`
 - **baseURL MUST be set**: `https://openrouter.ai/api/v1`
-- Model: `anthropic/claude-haiku-4-5-20250514`
+- Model: `anthropic/claude-haiku-4.5`
 - Use `generateText()` from AI SDK
 - Implement: Plan Generation, Review Scheduling, Method Recommendation, Progress Analysis, Motivation
 
