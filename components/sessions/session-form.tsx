@@ -101,7 +101,7 @@ export function SessionForm({ subjects, onSuccess }: SessionFormProps) {
                 <SelectValue placeholder="Rate your understanding" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">1 - Didn't understand</SelectItem>
+                <SelectItem value="1">1 - Didn&apos;t understand</SelectItem>
                 <SelectItem value="2">2 - Poor understanding</SelectItem>
                 <SelectItem value="3">3 - Average understanding</SelectItem>
                 <SelectItem value="4">4 - Good understanding</SelectItem>

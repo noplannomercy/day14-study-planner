@@ -61,7 +61,7 @@ export function TodayReviews({ reviews: initialReviews }: TodayReviewsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today's Reviews ({reviews.length})</CardTitle>
+        <CardTitle>Today&apos;s Reviews ({reviews.length})</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -102,7 +102,7 @@ export function TodayReviews({ reviews: initialReviews }: TodayReviewsProps) {
                       <SelectValue placeholder="Select level" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1 - Don't remember</SelectItem>
+                      <SelectItem value="1">1 - Don&apos;t remember</SelectItem>
                       <SelectItem value="2">2 - Vague memory</SelectItem>
                       <SelectItem value="3">3 - Some recall</SelectItem>
                       <SelectItem value="4">4 - Clear recall</SelectItem>
