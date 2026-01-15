@@ -26,7 +26,8 @@ export default async function Home() {
 
   const subjects = subjectsResult.success && subjectsResult.data ? subjectsResult.data : [];
   const sessions = sessionsResult.success && sessionsResult.data ? sessionsResult.data : [];
-  const todayReviews = reviewsResult.success && reviewsResult.data ? reviewsResult.data : [];
+  const todayReviewsRaw = reviewsResult.success && reviewsResult.data ? reviewsResult.data : [];
+  const todayReviews = todayReviewsRaw.filter(r => r.session && r.session.subject);
 
   // Fetch sessions with subject data for charts
   const sessionsWithSubjectsRaw = await db.query.studySessions.findMany({
