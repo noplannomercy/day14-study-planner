@@ -69,30 +69,32 @@ export function ReviewCalendar({ reviews }: ReviewCalendarProps) {
             <p className="text-muted-foreground">No reviews scheduled for this date.</p>
           ) : (
             <div className="space-y-3">
-              {selectedReviews.map((review) => (
-                <div key={review.id} className="p-3 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: review.session.subject.color }}
-                    />
-                    <span className="font-medium">{review.session.subject.name}</span>
-                    <Badge variant="secondary">
-                      Rep #{review.repetitionCount + 1}
-                    </Badge>
+              {selectedReviews
+                .filter((review) => review.session && review.session.subject)
+                .map((review) => (
+                  <div key={review.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: review.session.subject.color }}
+                      />
+                      <span className="font-medium">{review.session.subject.name}</span>
+                      <Badge variant="secondary">
+                        Rep #{review.repetitionCount + 1}
+                      </Badge>
+                    </div>
+                    {review.session.notes && (
+                      <p className="text-sm text-muted-foreground">
+                        {review.session.notes}
+                      </p>
+                    )}
+                    {review.completedAt && (
+                      <Badge variant="outline" className="mt-2">
+                        Completed
+                      </Badge>
+                    )}
                   </div>
-                  {review.session.notes && (
-                    <p className="text-sm text-muted-foreground">
-                      {review.session.notes}
-                    </p>
-                  )}
-                  {review.completedAt && (
-                    <Badge variant="outline" className="mt-2">
-                      Completed
-                    </Badge>
-                  )}
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </CardContent>

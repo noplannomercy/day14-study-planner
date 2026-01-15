@@ -14,6 +14,8 @@ import { db } from '@/db';
 import { learningPlans, reviewSchedules, studySessions } from '@/db/schema';
 import { isNull } from 'drizzle-orm';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   // Fetch all necessary data
   const [subjectsResult, sessionsResult, reviewsResult] = await Promise.all([
