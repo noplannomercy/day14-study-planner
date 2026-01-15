@@ -65,21 +65,23 @@ export function TodayReviews({ reviews: initialReviews }: TodayReviewsProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {reviews.map((review) => (
-            <div
-              key={review.id}
-              className="p-4 border rounded-lg space-y-3"
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: review.session.subject.color }}
-                />
-                <span className="font-medium">{review.session.subject.name}</span>
-                <span className="text-sm text-muted-foreground">
-                  • Repetition #{review.repetitionCount + 1}
-                </span>
-              </div>
+          {reviews
+            .filter((review) => review.session && review.session.subject)
+            .map((review) => (
+              <div
+                key={review.id}
+                className="p-4 border rounded-lg space-y-3"
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: review.session.subject.color }}
+                  />
+                  <span className="font-medium">{review.session.subject.name}</span>
+                  <span className="text-sm text-muted-foreground">
+                    • Repetition #{review.repetitionCount + 1}
+                  </span>
+                </div>
 
               {review.session.notes && (
                 <p className="text-sm text-muted-foreground">

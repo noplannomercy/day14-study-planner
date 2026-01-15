@@ -144,26 +144,28 @@ export function PlanList({ plans }: PlanListProps) {
 
   return (
     <div className="space-y-4">
-      {plans.map((plan) => (
-        <Card key={plan.id}>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: plan.subject.color }}
-              />
-              <CardTitle className="text-lg">{plan.subject.name}</CardTitle>
-              <span className="text-sm text-muted-foreground">• {plan.weeksAvailable} weeks</span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">{plan.studyGoal}</p>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none whitespace-pre-wrap">
-              {plan.aiPlan}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      {plans
+        .filter((plan) => plan.subject)
+        .map((plan) => (
+          <Card key={plan.id}>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: plan.subject.color }}
+                />
+                <CardTitle className="text-lg">{plan.subject.name}</CardTitle>
+                <span className="text-sm text-muted-foreground">• {plan.weeksAvailable} weeks</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">{plan.studyGoal}</p>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm max-w-none whitespace-pre-wrap">
+                {plan.aiPlan}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
     </div>
   );
 }

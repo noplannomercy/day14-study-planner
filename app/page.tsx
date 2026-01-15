@@ -29,15 +29,16 @@ export default async function Home() {
   const todayReviews = reviewsResult.success && reviewsResult.data ? reviewsResult.data : [];
 
   // Fetch sessions with subject data for charts
-  const sessionsWithSubjects = await db.query.studySessions.findMany({
+  const sessionsWithSubjectsRaw = await db.query.studySessions.findMany({
     with: {
       subject: true,
     },
     orderBy: (studySessions, { desc }) => [desc(studySessions.studiedAt)],
   });
+  const sessionsWithSubjects = sessionsWithSubjectsRaw.filter(s => s.subject);
 
   // Fetch all reviews for calendar
-  const allReviews = await db.query.reviewSchedules.findMany({
+  const allReviewsRaw = await db.query.reviewSchedules.findMany({
     where: isNull(reviewSchedules.completedAt),
     with: {
       session: {
@@ -47,14 +48,16 @@ export default async function Home() {
       },
     },
   });
+  const allReviews = allReviewsRaw.filter(r => r.session && r.session.subject);
 
   // Fetch learning plans
-  const plans = await db.query.learningPlans.findMany({
+  const plansRaw = await db.query.learningPlans.findMany({
     with: {
       subject: true,
     },
     orderBy: (learningPlans, { desc }) => [desc(learningPlans.createdAt)],
   });
+  const plans = plansRaw.filter(p => p.subject);
 
   return (
     <div className="min-h-screen bg-gray-50">
