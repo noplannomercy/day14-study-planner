@@ -59,11 +59,11 @@ export async function createStudySession(data: NewStudySession) {
     // Create study session
     const [newSession] = await db.insert(studySessions).values(data).returning();
 
-    // Create initial review schedule
-    const nextReviewDate = calculateNextReviewDate(data.comprehension, 0);
+    // Create initial review schedule (set to today so it appears immediately)
+    const today = new Date();
     const reviewSchedule: NewReviewSchedule = {
       sessionId: newSession.id,
-      nextReviewDate: nextReviewDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+      nextReviewDate: today.toISOString().split('T')[0], // Format as YYYY-MM-DD
       repetitionCount: 0,
       comprehension: data.comprehension,
     };
