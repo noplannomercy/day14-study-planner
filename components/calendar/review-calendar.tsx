@@ -17,22 +17,25 @@ interface ReviewCalendarProps {
 export function ReviewCalendar({ reviews }: ReviewCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
+  // Filter out reviews with null session or subject
+  const validReviews = reviews.filter((review) => review.session && review.session.subject);
+
   // Group reviews by date
-  const reviewsByDate = reviews.reduce((acc, review) => {
+  const reviewsByDate = validReviews.reduce((acc, review) => {
     const date = review.nextReviewDate;
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(review);
     return acc;
-  }, {} as Record<string, typeof reviews>);
+  }, {} as Record<string, typeof validReviews>);
 
   // Get reviews for selected date
   const selectedDateStr = selectedDate?.toISOString().split('T')[0];
   const selectedReviews = selectedDateStr ? (reviewsByDate[selectedDateStr] || []) : [];
 
   // Get dates with reviews for highlighting
-  const reviewDates = reviews.map(r => new Date(r.nextReviewDate));
+  const reviewDates = validReviews.map(r => new Date(r.nextReviewDate));
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -69,9 +72,7 @@ export function ReviewCalendar({ reviews }: ReviewCalendarProps) {
             <p className="text-muted-foreground">No reviews scheduled for this date.</p>
           ) : (
             <div className="space-y-3">
-              {selectedReviews
-                .filter((review) => review.session && review.session.subject)
-                .map((review) => (
+              {selectedReviews.map((review) => (
                   <div key={review.id} className="p-3 border rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <div

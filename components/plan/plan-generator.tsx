@@ -130,7 +130,10 @@ interface PlanListProps {
 }
 
 export function PlanList({ plans }: PlanListProps) {
-  if (plans.length === 0) {
+  // Filter out plans with null subject
+  const validPlans = plans.filter((plan) => plan.subject);
+
+  if (validPlans.length === 0) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -144,9 +147,7 @@ export function PlanList({ plans }: PlanListProps) {
 
   return (
     <div className="space-y-4">
-      {plans
-        .filter((plan) => plan.subject)
-        .map((plan) => (
+      {validPlans.map((plan) => (
           <Card key={plan.id}>
             <CardHeader>
               <div className="flex items-center gap-2">

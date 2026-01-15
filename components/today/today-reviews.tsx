@@ -22,6 +22,9 @@ export function TodayReviews({ reviews: initialReviews }: TodayReviewsProps) {
   const [completingId, setCompletingId] = useState<number | null>(null);
   const [comprehensionLevels, setComprehensionLevels] = useState<Record<number, string>>({});
 
+  // Filter out reviews with null session or subject
+  const validReviews = reviews.filter((review) => review.session && review.session.subject);
+
   const handleComplete = async (reviewId: number) => {
     const comprehension = comprehensionLevels[reviewId];
     if (!comprehension) {
@@ -46,7 +49,7 @@ export function TodayReviews({ reviews: initialReviews }: TodayReviewsProps) {
     }
   };
 
-  if (reviews.length === 0) {
+  if (validReviews.length === 0) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -61,13 +64,11 @@ export function TodayReviews({ reviews: initialReviews }: TodayReviewsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today&apos;s Reviews ({reviews.length})</CardTitle>
+        <CardTitle>Today&apos;s Reviews ({validReviews.length})</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {reviews
-            .filter((review) => review.session && review.session.subject)
-            .map((review) => (
+          {validReviews.map((review) => (
               <div
                 key={review.id}
                 className="p-4 border rounded-lg space-y-3"
